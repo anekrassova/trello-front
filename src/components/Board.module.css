@@ -1,0 +1,51 @@
+.boardItem {
+    background-color: var(--block-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 4px;
+    color:var(--text-color);
+}
+
+.boardItem:hover {
+    background-color: var(--bg-color-hover);
+}
+
+.boardTitle {
+    font-size:30px;
+}
+
+.boardActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.boardButton {
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    background-color: transparent !important;
+    color: var(--text-color);
+}
+
+.boardLink {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.editContainer {
+    display: flex;
+    align-items: center;
+}
+
+.boardInput {
+    flex: 1;
+    padding: 5px;
+}
+
+.saveButton {
+    margin-left: 8px; 
+}

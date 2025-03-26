@@ -1,0 +1,57 @@
+:root{
+    --primary: #fffcff;
+    --bg-color: #f7e0ff;
+    --bg-color-hover: #dbb6e4;
+    --block-bg: #f1d4fb;
+    --text-color: #390f4a;
+    --text-color-white: white;
+    --button-color: #b054dc;
+    --button-color-hover: #8b42ae;
+    --border-color: #744585;
+    --error-color: #8b42ae;
+    --input-bg: #ffffff;
+}
+
+[data-theme='dark']{
+    --primary: #462c51;
+    --bg-color: #291a30;
+    --bg-color-hover: #180f1c;
+    --block-bg: #5c3b6a;
+    --text-color: #f8f8f2;
+    --text-color-white: #ffffff;
+    --button-color: #462c51;
+    --button-color-hover: #5c3b6a;
+    --border-color: #8a6daf;
+    --error-color: #5c3b6a;
+    --input-bg: #5c3b6a;
+}
+
+button{
+    padding: 10px;
+    background-color: var(--button-color);
+    color: var(--text-color-white);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover{
+    background-color: var(--button-color-hover);
+}
+
+input {
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color:var(--text-color);
+    caret-color: var(--text-color);
+}
+
+input::placeholder {
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+html{
+    background-color: var(--primary);
+}

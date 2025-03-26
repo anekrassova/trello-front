@@ -1,0 +1,30 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.content {
+    flex-grow: 1;
+    padding: 1rem;
+    background-color: var(--primary);
+}
+
+.newBoardForm {
+    display: flex;
+    gap: 0.5rem;
+}
+
+h3 {
+    color: var(--text-color);
+}
