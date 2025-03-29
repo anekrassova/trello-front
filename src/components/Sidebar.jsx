@@ -25,6 +25,7 @@ const Sidebar = ({ boards, setBoards, onCreateBoard, onDeleteBoard }) => {
 
   return (
     <div className={styles.sidebar}>
+      <h2>Trello Board</h2>
       <div className={styles.newBoardForm}>
         <input
           type="text"
@@ -32,7 +33,7 @@ const Sidebar = ({ boards, setBoards, onCreateBoard, onDeleteBoard }) => {
           onChange={(e) => setNewBoardTitle(e.target.value)}
           placeholder="Board name..."
         />
-        <button onClick={handleCreateBoard}>Create</button>
+        <button onClick={handleCreateBoard}>+</button>
       </div>
       <div className={styles.boardList}>
         {boards.map((board) => (

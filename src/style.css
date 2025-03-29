@@ -1,32 +1,33 @@
-:root{
-    --primary: #fffcff;
-    --bg-color: #f7e0ff;
-    --bg-color-hover: #dbb6e4;
-    --block-bg: #f1d4fb;
-    --text-color: #390f4a;
-    --text-color-white: white;
-    --button-color: #b054dc;
-    --button-color-hover: #8b42ae;
-    --border-color: #744585;
-    --error-color: #8b42ae;
+:root {
+    font-family: "Harmonia Sans Pro Cyr";
+    --primary: #f0f3f9;
+    --bg-color: #ffffff;
+    --bg-color-hover: #dce3ec;
+    --block-bg: #ccd1dd;
+    --text-color: #3d4b65;
+    --text-color-white: #ffffff;
+    --button-color: #3d4b65;
+    --button-color-hover: #6e727e;
+    --border-color: #6e727e;
+    --error-color: #636872;
     --input-bg: #ffffff;
 }
 
-[data-theme='dark']{
-    --primary: #462c51;
-    --bg-color: #291a30;
-    --bg-color-hover: #180f1c;
-    --block-bg: #5c3b6a;
-    --text-color: #f8f8f2;
+[data-theme='dark'] {
+    --primary: #3d4b65;
+    --bg-color: #636872;
+    --bg-color-hover: #6e727e;
+    --block-bg: #6e727e;
+    --text-color: #f0f3f9;
     --text-color-white: #ffffff;
-    --button-color: #462c51;
-    --button-color-hover: #5c3b6a;
-    --border-color: #8a6daf;
-    --error-color: #5c3b6a;
-    --input-bg: #5c3b6a;
+    --button-color: #636872;
+    --button-color-hover: #6e727e;
+    --border-color: #dce3ec;
+    --error-color: #dce3ec;
+    --input-bg: #6e727e;
 }
 
-button{
+button {
     padding: 10px;
     background-color: var(--button-color);
     color: var(--text-color-white);
@@ -36,14 +37,14 @@ button{
     transition: background-color 0.3s;
 }
 
-button:hover{
+button:hover {
     background-color: var(--button-color-hover);
 }
 
 input {
     border: 1px solid var(--border-color);
     background-color: var(--input-bg);
-    color:var(--text-color);
+    color: var(--text-color);
     caret-color: var(--text-color);
 }
 
@@ -52,6 +53,6 @@ input::placeholder {
     opacity: 0.7;
 }
 
-html{
+html {
     background-color: var(--primary);
 }
