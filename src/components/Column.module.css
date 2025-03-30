@@ -1,0 +1,44 @@
+.column {
+    background-color: var(--block-bg);
+    border-radius: 30px;
+    padding: 10px;
+    width: 260px;
+    margin: 0 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+h4 {
+    appearance: none;
+    padding: 0 20px;
+}
+
+.taskList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.addTaskForm {
+    display: flex;
+    gap: 5px;
+}
+
+.addTaskForm input {
+    flex-grow: 1;
+    padding: 8px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+.addTaskForm button {
+    padding: 8px 12px;
+    border-radius: 50%;
+    background-color: var(--button-color);
+    color: var(--text-color-white);
+    border: none;
+    cursor: pointer;
+}

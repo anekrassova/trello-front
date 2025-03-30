@@ -45,8 +45,8 @@ const Board = ({ board, onDelete, onUpdate }) => {
         </div>
       ) : (
         <>
-          <Link to={`/${board.id}`} className={styles.boardLink}>
-            <span>{board.title}</span>
+          <Link to={`/board/${board.id}`} className={styles.boardLink}>
+          <span>{board.title}</span>
           </Link>
           <div className={styles.boardActions}>
             <button onClick={handleEdit} className={styles.boardButton}>

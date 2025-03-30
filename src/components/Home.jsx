@@ -13,7 +13,6 @@ const Home = () => {
 
   const fetchBoards = async () => {
     const boards = await boardService.getBoards();
-    console.log('Ответ от сервера:', boards);
     const formattedBoards = boards.data.map((board) => ({
       ...board,
       id: board.id,
@@ -24,6 +23,12 @@ const Home = () => {
   useEffect(() => {
     fetchBoards();
   }, []);
+
+  useEffect(() => {
+    if (user && boards.length > 0) {
+      navigate(`/board/${boards[0].id}`);
+    }
+  }, [boards, user, navigate]);
 
   if (!user) {
     navigate('/login');
@@ -48,10 +53,6 @@ const Home = () => {
     }
   };
 
-  if (user) {
-    console.log('user:', user);
-  }
-
   return (
     <>
       <Header />
@@ -63,7 +64,7 @@ const Home = () => {
           onDeleteBoard={onDeleteBoard}
         />
         <div className={styles.content}>
-          <h3>Select a board to display its contents.</h3>
+          <h3>Loading board...</h3>
         </div>
       </div>
     </>

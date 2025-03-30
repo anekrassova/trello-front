@@ -6,7 +6,7 @@
     padding-bottom: 10px;
     height: 45px;
     width: 100%;
-    background-color: #ffffff;
+    background-color: var(--bg-color);
 }
 
 .userInfo {
@@ -17,14 +17,19 @@
 
 .actions {
     display: flex;
-    gap: 1rem;
 }
 
 .actions button {
     margin: 10px;
+    padding: 10px 14px;
     border: none;
     border-radius: 99px;
     cursor: pointer;
     transition: background-color 0.2s;
+    background-color: var(--button-color);
+    color: var(--text-color-white);
 }
 
+.actions button:hover {
+    background-color: var(--button-color-hover);
+}

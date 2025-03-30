@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Board from './Board';
 import styles from './Sidebar.module.css';
 
 const Sidebar = ({ boards, setBoards, onCreateBoard, onDeleteBoard }) => {
   const [newBoardTitle, setNewBoardTitle] = useState('');
+  const navigate = useNavigate();
 
   const handleCreateBoard = async () => {
     if (!newBoardTitle.trim()) return;
@@ -37,12 +39,17 @@ const Sidebar = ({ boards, setBoards, onCreateBoard, onDeleteBoard }) => {
       </div>
       <div className={styles.boardList}>
         {boards.map((board) => (
-          <Board
+          <div
             key={board.id}
-            board={board}
-            onDelete={onDeleteBoard}
-            onUpdate={handleUpdateBoard}
-          />
+            className={styles.boardLink}
+            onClick={() => navigate(`/board/${board.id}`)} // 👈 теперь переход!
+          >
+            <Board
+              board={board}
+              onDelete={onDeleteBoard}
+              onUpdate={handleUpdateBoard}
+            />
+          </div>
         ))}
       </div>
     </div>

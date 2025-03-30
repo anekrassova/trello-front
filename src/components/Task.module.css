@@ -1,0 +1,37 @@
+.task {
+    background-color: var(--bg-color-hover);
+    padding: 12px;
+    border-radius: 20px;
+    color: var(--text-color);
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.view {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.actions {
+    display: flex;
+    gap: 5px;
+}
+
+.editing {
+    display: flex;
+    gap: 5px;
+    width: 100%;
+}
+
+.editing input {
+    flex-grow: 1;
+    padding: 6px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}

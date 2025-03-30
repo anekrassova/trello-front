@@ -8,6 +8,7 @@
     height: 100vh;
     border-radius: 48px;
     margin-top: 20px;
+    gap: 15px;
 }
 
 h2 {
@@ -16,14 +17,24 @@ h2 {
 
 .newBoardForm {
     display: flex;
-    gap: 7px;
-    margin-bottom: 20px;
+    justify-content: space-between;
+    gap: 10px;
 }
 
 .newBoardForm input {
     flex-grow: 1;
     padding: 10px 15px;
     border-radius: 99px;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    caret-color: var(--text-color);
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.newBoardForm input::placeholder {
+    color: var(--text-color);
+    opacity: 0.7;
 }
 
 .newBoardForm button {
@@ -31,10 +42,17 @@ h2 {
     border: none;
     border-radius: 99px;
     cursor: pointer;
+    background-color: var(--button-color);
+    color: var(--text-color-white);
+    transition: background-color 0.3s;
 }
+
+.newBoardForm button:hover {
+    background-color: var(--button-color-hover);
+}
+
 
 .boardList {
     display: flex;
     flex-direction: column;
 }
-

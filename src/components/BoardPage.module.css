@@ -28,3 +28,27 @@ body, html {
 h3 {
     color: var(--text-color);
 }
+
+.columns {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.newColumnForm {
+    display: flex;
+    justify-content: space-between;
+}
+
+.newColumnForm input {
+    border-radius: 99px;
+    padding: 10px 20px;
+    width: 86%;
+}
+
+.newColumnForm button {
+    border-radius: 99px;
+    font-size: 20px;
+    width: 9%;
+}
