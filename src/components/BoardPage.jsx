@@ -3,9 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from './BoardPage.module.css';
 import authService from '../services/authService.js';
 import * as boardService from '../services/boardService.js';
+import columnService from '../services/columnService.js';
 import Header from './Header.jsx';
 import Sidebar from './Sidebar.jsx';
 import Column from './Column.jsx';
+import cardService from '../services/cardService.js';
 
 const BoardPage = () => {
   const [boards, setBoards] = useState([]);
@@ -17,121 +19,172 @@ const BoardPage = () => {
   const user = authService.getCurrentUser();
   const navigate = useNavigate();
 
-  const fetchBoards = async () => {
-    const boards = await boardService.getBoards();
-    const formattedBoards = boards.data.map((board) => ({
-      ...board,
-      id: board.id,
-    }));
-    setBoards(formattedBoards);
-  };
-
   useEffect(() => {
     fetchBoards();
-  }, []);
+    fetchColumns();
+  }, [id]);
 
   useEffect(() => {
-    if (!columnsByBoard[id]) {
-      setColumnsByBoard((prev) => ({
-        ...prev,
-        [id]: [],
-      }));
+    if (columnsByBoard[id] && columnsByBoard[id].length > 0) {
+      fetchTasks();
     }
-    if (!tasksByBoard[id]) {
-      setTasksByBoard((prev) => ({
-        ...prev,
-        [id]: [],
-      }));
-    }
-  }, [id]);
+  }, [columnsByBoard]);
 
   useEffect(() => {
     if (!user) navigate('/login');
   }, [user]);
 
-  const onCreateBoard = async (title) => {
+  const fetchBoards = async () => {
     try {
-      const newBoard = await boardService.createBoard(title);
-      setBoards([...boards, newBoard]);
+      const boards = await boardService.getBoards();
+      setBoards(boards.data);
     } catch (error) {
-      console.error('Error creating board:', error);
+      console.error('Ошибка загрузки досок:', error);
     }
   };
 
-  const onDeleteBoard = async (boardId) => {
+  const fetchColumns = async () => {
+    if (!id) return;
     try {
-      await boardService.deleteBoard(boardId);
-      setBoards(boards.filter((board) => board.id !== boardId));
-      setColumnsByBoard((prev) => {
-        const updated = { ...prev };
-        delete updated[boardId];
-        return updated;
-      });
-      setTasksByBoard((prev) => {
-        const updated = { ...prev };
-        delete updated[boardId];
-        return updated;
-      });
-      navigate('/');
+      const columns = await columnService.getColumns(id);
+      setColumnsByBoard((prev) => ({
+        ...prev,
+        [id]: columns || [],
+      }));
     } catch (error) {
-      console.error('Ошибка при удалении доски:', error);
+      console.error('Ошибка загрузки колонок:', error);
     }
   };
 
-  const handleAddTask = (columnId, text) => {
-    const newTask = {
-      id: Date.now(),
-      columnId,
-      text,
-    };
-    setTasksByBoard((prev) => ({
-      ...prev,
-      [id]: [...(prev[id] || []), newTask],
-    }));
+  const fetchTasks = async () => {
+    if (!id || !columnsByBoard[id]) return;
+
+    try {
+      const tasks = {};
+      for (const column of columnsByBoard[id]) {
+        const columnTasks = await cardService.getCards(column.id);
+        tasks[column.id] = columnTasks || [];
+      }
+      setTasksByBoard((prev) => ({
+        ...prev,
+        [id]: tasks,
+      }));
+    } catch (error) {
+      console.error('Ошибка загрузки задач:', error);
+    }
   };
 
-  const handleEditTask = (taskId, newText) => {
-    setTasksByBoard((prev) => ({
-      ...prev,
-      [id]: prev[id].map((task) =>
-        task.id === taskId ? { ...task, text: newText } : task
-      ),
-    }));
+  const handleAddTask = async (columnId, title) => {
+    try {
+      const newTask = await cardService.createCard(title, columnId);
+      setTasksByBoard((prev) => ({
+        ...prev,
+        [id]: {
+          ...(prev[id] || {}),
+          [columnId]: [...(prev[id]?.[columnId] || []), newTask],
+        },
+      }));
+    } catch (error) {
+      console.error('Ошибка при добавлении задачи:', error);
+    }
   };
 
-  const handleDeleteTask = (taskId) => {
-    setTasksByBoard((prev) => ({
-      ...prev,
-      [id]: prev[id].filter((task) => task.id !== taskId),
-    }));
+  const handleEditTask = async (taskId, newText) => {
+    try {
+      const updatedTask = await cardService.updateCard(taskId, {
+        title: newText,
+      });
+
+      setTasksByBoard((prev) => ({
+        ...prev,
+        [id]: Object.fromEntries(
+          Object.entries(prev[id] || {}).map(([colId, tasks]) => [
+            colId,
+            tasks.map((task) =>
+              task.id === taskId ? { ...task, title: updatedTask.title } : task
+            ),
+          ])
+        ),
+      }));
+    } catch (error) {
+      console.error('Ошибка при обновлении задачи:', error);
+    }
   };
 
-  const handleAddColumn = () => {
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await cardService.deleteCard(taskId);
+
+      setTasksByBoard((prev) => ({
+        ...prev,
+        [id]: Object.fromEntries(
+          Object.entries(prev[id] || {}).map(([colId, tasks]) => [
+            colId,
+            tasks.filter((task) => task.id !== taskId),
+          ])
+        ),
+      }));
+    } catch (error) {
+      console.error('Ошибка при удалении задачи:', error);
+    }
+  };
+
+  const handleAddColumn = async () => {
     if (!newColumnTitle.trim()) return;
-    const newColumn = {
-      id: Date.now(),
-      title: newColumnTitle,
-    };
-    setColumnsByBoard((prev) => ({
-      ...prev,
-      [id]: [...(prev[id] || []), newColumn],
-    }));
-    setNewColumnTitle('');
+    try {
+      const newColumn = await columnService.createColumn(id, newColumnTitle);
+      setColumnsByBoard((prev) => ({
+        ...prev,
+        [id]: [...(prev[id] || []), newColumn],
+      }));
+      setNewColumnTitle('');
+    } catch (error) {
+      console.error('Ошибка при создании колонки:', error);
+    }
   };
 
-  const currentColumns = columnsByBoard[id] || [];
-  const currentTasks = tasksByBoard[id] || [];
+  const handleEditColumn = async (columnId, newTitle) => {
+    try {
+      const updatedColumn = await columnService.updateColumn(
+        columnId,
+        newTitle
+      );
+
+      setColumnsByBoard((prev) => ({
+        ...prev,
+        [id]: (prev[id] || []).map((col) =>
+          col.id === columnId ? { ...col, title: updatedColumn.title } : col
+        ),
+      }));
+    } catch (error) {
+      console.error('Ошибка при обновлении колонки:', error);
+    }
+  };
+
+  const handleDeleteColumn = async (columnId) => {
+    try {
+      await columnService.deleteColumn(columnId);
+
+      setColumnsByBoard((prev) => ({
+        ...prev,
+        [id]: (prev[id] || []).filter((col) => col.id !== columnId),
+      }));
+
+      setTasksByBoard((prev) => {
+        const updatedTasks = { ...prev };
+        delete updatedTasks[columnId];
+        return updatedTasks;
+      });
+    } catch (error) {
+      console.error('Ошибка при удалении колонки:', error);
+    }
+  };
 
   return (
     <>
       <Header />
       <div className={styles.container}>
-        <Sidebar
-          boards={boards}
-          setBoards={setBoards}
-          onDeleteBoard={onDeleteBoard}
-          onCreateBoard={onCreateBoard}
-        />
+        <Sidebar boards={boards} setBoards={setBoards} />
         <div className={styles.content}>
           <div className={styles.newColumnForm}>
             <input
@@ -143,14 +196,16 @@ const BoardPage = () => {
             <button onClick={handleAddColumn}>+</button>
           </div>
           <div className={styles.columns}>
-            {currentColumns.map((column) => (
+            {columnsByBoard[id]?.map((column) => (
               <Column
                 key={column.id}
                 column={column}
-                tasks={currentTasks.filter((task) => task.columnId === column.id)}
+                tasks={tasksByBoard[id]?.[column.id] || []}
                 onAddTask={handleAddTask}
                 onEditTask={handleEditTask}
                 onDeleteTask={handleDeleteTask}
+                onEditColumn={handleEditColumn}
+                onDeleteColumn={handleDeleteColumn}
               />
             ))}
           </div>

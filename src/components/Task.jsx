@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import styles from './Task.module.css';
 
-const Task = ({ task, onEditTask, onDeleteTask }) => {
+const Task = ({ task, columnId, onEditTask, onDeleteTask }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [text, setText] = useState(task.text);
+  const [text, setText] = useState(task.title);
 
   const handleSave = () => {
-    onEditTask(task.id, text);
+    onEditTask(task.id, text); // Теперь всё правильно
     setIsEditing(false);
   };
 
@@ -23,10 +23,10 @@ const Task = ({ task, onEditTask, onDeleteTask }) => {
         </div>
       ) : (
         <div className={styles.view}>
-          <span>{task.text}</span>
+          <span>{task.title}</span>
           <div className={styles.actions}>
             <button onClick={() => setIsEditing(true)}>✏</button>
-            <button onClick={() => onDeleteTask(task.id)}>✖</button>
+            <button onClick={() => onDeleteTask(task.id, columnId)}>✖</button>
           </div>
         </div>
       )}

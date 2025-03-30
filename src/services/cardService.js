@@ -3,7 +3,7 @@ const API_URL = 'http://localhost:3000/api/cards';
 export const getCards = async (columnId) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/${columnId}/cards`, {
+    const response = await fetch(`${API_URL}/${columnId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
