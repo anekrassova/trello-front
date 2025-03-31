@@ -25,14 +25,15 @@ const BoardPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (columnsByBoard[id] && columnsByBoard[id].length > 0) {
+    if (columnsByBoard[id]?.length > 0) {
       fetchTasks();
     }
-  }, [columnsByBoard]);
+  }, [columnsByBoard[id]]);
 
-  useEffect(() => {
-    if (!user) navigate('/login');
-  }, [user]);
+  if (!user) {
+    navigate('/login');
+    return null;
+  }
 
   const fetchBoards = async () => {
     try {
@@ -46,7 +47,8 @@ const BoardPage = () => {
   const fetchColumns = async () => {
     if (!id) return;
     try {
-      const columns = await columnService.getColumns(id);
+      const response = await columnService.getColumns(id);
+      const columns = response.data;
       setColumnsByBoard((prev) => ({
         ...prev,
         [id]: columns || [],
@@ -60,11 +62,15 @@ const BoardPage = () => {
     if (!id || !columnsByBoard[id]) return;
 
     try {
-      const tasks = {};
-      for (const column of columnsByBoard[id]) {
-        const columnTasks = await cardService.getCards(column.id);
-        tasks[column.id] = columnTasks || [];
-      }
+      const tasksArray = await Promise.all(
+        columnsByBoard[id].map(async (column) => {
+          const response = await cardService.getCards(column.id);
+          return { [column.id]: response.data || [] };
+        })
+      );
+
+      const tasks = Object.assign({}, ...tasksArray);
+
       setTasksByBoard((prev) => ({
         ...prev,
         [id]: tasks,
@@ -74,9 +80,29 @@ const BoardPage = () => {
     }
   };
 
+  const onCreateBoard = async (title) => {
+    try {
+      const response = await boardService.createBoard(title);
+      const newBoard = response.data;
+      setBoards([...boards, newBoard]);
+    } catch (error) {
+      console.error('Error creating board:', error);
+    }
+  };
+
+  const onDeleteBoard = async (id) => {
+    try {
+      await boardService.deleteBoard(id);
+      setBoards(boards.filter((board) => board.id !== id));
+    } catch (error) {
+      console.error('Ошибка при удалении доски:', error);
+    }
+  };
+
   const handleAddTask = async (columnId, title) => {
     try {
-      const newTask = await cardService.createCard(title, columnId);
+      const response = await cardService.createCard(title, columnId);
+      const newTask = response.data;
       setTasksByBoard((prev) => ({
         ...prev,
         [id]: {
@@ -101,7 +127,9 @@ const BoardPage = () => {
           Object.entries(prev[id] || {}).map(([colId, tasks]) => [
             colId,
             tasks.map((task) =>
-              task.id === taskId ? { ...task, title: updatedTask.title } : task
+              task.id === taskId
+                ? { ...task, title: updatedTask.data.title }
+                : task
             ),
           ])
         ),
@@ -132,7 +160,8 @@ const BoardPage = () => {
   const handleAddColumn = async () => {
     if (!newColumnTitle.trim()) return;
     try {
-      const newColumn = await columnService.createColumn(id, newColumnTitle);
+      const response = await columnService.createColumn(id, newColumnTitle);
+      const newColumn = response.data;
       setColumnsByBoard((prev) => ({
         ...prev,
         [id]: [...(prev[id] || []), newColumn],
@@ -153,7 +182,9 @@ const BoardPage = () => {
       setColumnsByBoard((prev) => ({
         ...prev,
         [id]: (prev[id] || []).map((col) =>
-          col.id === columnId ? { ...col, title: updatedColumn.title } : col
+          col.id === columnId
+            ? { ...col, title: updatedColumn.data.title }
+            : col
         ),
       }));
     } catch (error) {
@@ -184,7 +215,12 @@ const BoardPage = () => {
     <>
       <Header />
       <div className={styles.container}>
-        <Sidebar boards={boards} setBoards={setBoards} />
+        <Sidebar
+          boards={boards}
+          setBoards={setBoards}
+          onCreateBoard={onCreateBoard}
+          onDeleteBoard={onDeleteBoard}
+        />
         <div className={styles.content}>
           <div className={styles.newColumnForm}>
             <input

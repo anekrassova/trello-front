@@ -1,80 +1,44 @@
+import { fetchWithErrorHandling } from './apiService';
+
 const API_URL = 'http://localhost:3000/api/cards';
 
 export const getCards = async (columnId) => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/${columnId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) throw new Error('Error while loading cards.');
-    const { data } = await response.json();
-    return data;
-  } catch (error) {
-    console.error(error.message);
-    return [];
-  }
+  const token = localStorage.getItem('token');
+  return fetchWithErrorHandling(`${API_URL}/${columnId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 };
 
 export const createCard = async (title, column, description, position) => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ title, column, description, position }),
-    });
-
-    if (!response.ok) throw new Error('Error while creating card.');
-    const { data } = await response.json();
-    return data;
-  } catch (error) {
-    console.error(error.message);
-    return null;
-  }
+  const token = localStorage.getItem('token');
+  return fetchWithErrorHandling(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ title, column, description, position }),
+  });
 };
 
 export const updateCard = async (id, updates) => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(updates),
-    });
-
-    if (!response.ok) throw new Error('Error while updating card.');
-    const { data } = await response.json();
-    return data;
-  } catch (error) {
-    console.error(error.message);
-    return null;
-  }
+  const token = localStorage.getItem('token');
+  return fetchWithErrorHandling(`${API_URL}/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(updates),
+  });
 };
 
 export const deleteCard = async (id) => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) throw new Error('Error while deleting card.');
-  } catch (error) {
-    console.error(error.message);
-  }
+  const token = localStorage.getItem('token');
+  return fetchWithErrorHandling(`${API_URL}/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
 };
 
-const cardService = { getCards, createCard, updateCard, deleteCard };
-export default cardService;
+export default { getCards, createCard, updateCard, deleteCard };

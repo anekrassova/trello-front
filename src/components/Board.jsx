@@ -16,7 +16,8 @@ const Board = ({ board, onDelete, onUpdate }) => {
   };
 
   const handleSave = async () => {
-    const updatedBoard = await boardService.updateBoard(board.id, newTitle);
+    const response = await boardService.updateBoard(board.id, newTitle);
+    const updatedBoard = response.data;
     if (updatedBoard) {
       onUpdate(updatedBoard);
       setIsEditing(false);
@@ -46,7 +47,7 @@ const Board = ({ board, onDelete, onUpdate }) => {
       ) : (
         <>
           <Link to={`/board/${board.id}`} className={styles.boardLink}>
-          <span>{board.title}</span>
+            <span>{board.title}</span>
           </Link>
           <div className={styles.boardActions}>
             <button onClick={handleEdit} className={styles.boardButton}>

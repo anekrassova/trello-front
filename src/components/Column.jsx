@@ -20,7 +20,7 @@ const Column = ({
     if (!newTaskText.trim()) return;
     try {
       await onAddTask(column.id, newTaskText);
-      setNewTaskText(''); // Очищаем поле после добавления
+      setNewTaskText('');
     } catch (error) {
       console.error('Ошибка при добавлении задачи:', error);
     }
@@ -35,17 +35,12 @@ const Column = ({
   };
 
   const handleSave = async () => {
-    const updatedColumn = await columnService.updateColumn(column.id, newTitle);
-    console.log('Ответ от сервера:', updatedColumn);
-    if (updatedColumn) {
-      onEditColumn(column.id, newTitle); // Обновляем в родителе
-      setIsEditing(false);
-    }
+    onEditColumn(column.id, newTitle);
+    setIsEditing(false);
   };
 
   const handleDelete = async () => {
-    await columnService.deleteColumn(column.id);
-    onDeleteColumn(column.id); // Удаляем в родителе
+    onDeleteColumn(column.id);
   };
 
   return (
