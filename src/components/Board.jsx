@@ -7,13 +7,8 @@ const Board = ({ board, onDelete, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(board.title);
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleChange = (e) => {
-    setNewTitle(e.target.value);
-  };
+  const handleEdit = () => setIsEditing(true);
+  const handleChange = (e) => setNewTitle(e.target.value);
 
   const handleSave = async () => {
     const response = await boardService.updateBoard(board.id, newTitle);
@@ -21,7 +16,6 @@ const Board = ({ board, onDelete, onUpdate }) => {
     if (updatedBoard) {
       onUpdate(updatedBoard);
       setIsEditing(false);
-      setNewTitle('');
     }
   };
 
@@ -50,12 +44,8 @@ const Board = ({ board, onDelete, onUpdate }) => {
             <span>{board.title}</span>
           </Link>
           <div className={styles.boardActions}>
-            <button onClick={handleEdit} className={styles.boardButton}>
-              ✏
-            </button>
-            <button onClick={handleDelete} className={styles.boardButton}>
-              ✖
-            </button>
+            <button onClick={handleEdit} className={styles.boardButton}>✏</button>
+            <button onClick={handleDelete} className={styles.boardButton}>✖</button>
           </div>
         </>
       )}
@@ -63,4 +53,4 @@ const Board = ({ board, onDelete, onUpdate }) => {
   );
 };
 
-export default Board;
+export default React.memo(Board);

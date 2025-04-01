@@ -1,47 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Task from './Task';
 import styles from './Column.module.css';
-import * as columnService from '../services/columnService';
 
 const Column = ({
-  column,
-  tasks,
-  onAddTask,
-  onEditTask,
-  onDeleteTask,
-  onEditColumn,
-  onDeleteColumn,
-}) => {
+                  column,
+                  tasks,
+                  onAddTask,
+                  onEditTask,
+                  onDeleteTask,
+                  onEditColumn,
+                  onDeleteColumn,
+                }) => {
   const [newTaskText, setNewTaskText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(column.title);
 
-  const handleAddTask = async () => {
+  const handleAddTask = useCallback(() => {
     if (!newTaskText.trim()) return;
-    try {
-      await onAddTask(column.id, newTaskText);
-      setNewTaskText('');
-    } catch (error) {
-      console.error('Ошибка при добавлении задачи:', error);
-    }
-  };
+    onAddTask(column.id, newTaskText);
+    setNewTaskText('');
+  }, [onAddTask, column.id, newTaskText]);
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
+  const handleEdit = () => setIsEditing(true);
 
-  const handleChange = (e) => {
-    setNewTitle(e.target.value);
-  };
+  const handleChange = (e) => setNewTitle(e.target.value);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(() => {
     onEditColumn(column.id, newTitle);
     setIsEditing(false);
-  };
+  }, [onEditColumn, column.id, newTitle]);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(() => {
     onDeleteColumn(column.id);
-  };
+  }, [onDeleteColumn, column.id]);
 
   return (
     <div className={styles.column}>
@@ -53,20 +44,14 @@ const Column = ({
             onChange={handleChange}
             className={styles.columnInput}
           />
-          <button onClick={handleSave} className={styles.saveButton}>
-            ✔
-          </button>
+          <button onClick={handleSave} className={styles.saveButton}>✔</button>
         </div>
       ) : (
         <div className={styles.columnHeader}>
           <h4>{column.title}</h4>
           <div className={styles.columnActions}>
-            <button onClick={handleEdit} className={styles.columnButton}>
-              ✏
-            </button>
-            <button onClick={handleDelete} className={styles.columnButton}>
-              ✖
-            </button>
+            <button onClick={handleEdit} className={styles.columnButton}>✏</button>
+            <button onClick={handleDelete} className={styles.columnButton}>✖</button>
           </div>
         </div>
       )}
@@ -96,4 +81,4 @@ const Column = ({
   );
 };
 
-export default Column;
+export default React.memo(Column);

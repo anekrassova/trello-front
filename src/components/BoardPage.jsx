@@ -1,27 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './BoardPage.module.css';
-import authService from '../services/authService.js';
-import * as boardService from '../services/boardService.js';
-import columnService from '../services/columnService.js';
-import Header from './Header.jsx';
-import Sidebar from './Sidebar.jsx';
-import Column from './Column.jsx';
-import cardService from '../services/cardService.js';
+
+import { useBoard } from '../context/BoardContext.jsx';
+import authService from '../services/authService';
+import cardService from '../services/cardService';
+
+import Header from './Header';
+import Sidebar from './Sidebar';
+import Column from './Column';
 
 const BoardPage = () => {
-  const [boards, setBoards] = useState([]);
-  const [columnsByBoard, setColumnsByBoard] = useState({});
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const user = authService.getCurrentUser();
+
+  const {
+    boards,
+    columnsByBoard,
+    fetchBoards,
+    fetchColumns,
+    onCreateBoard,
+    onDeleteBoard,
+    onCreateColumn,
+    onDeleteColumn,
+    onEditColumn,
+  } = useBoard();
+
   const [tasksByBoard, setTasksByBoard] = useState({});
   const [newColumnTitle, setNewColumnTitle] = useState('');
 
-  const { id } = useParams();
-  const user = authService.getCurrentUser();
-  const navigate = useNavigate();
+  useEffect(() => {
+    if (!user) navigate('/login');
+  }, [user, navigate]);
 
   useEffect(() => {
     fetchBoards();
-    fetchColumns();
+  }, []);
+
+  useEffect(() => {
+    if (id) fetchColumns(id);
   }, [id]);
 
   useEffect(() => {
@@ -29,34 +47,6 @@ const BoardPage = () => {
       fetchTasks();
     }
   }, [columnsByBoard[id]]);
-
-  if (!user) {
-    navigate('/login');
-    return null;
-  }
-
-  const fetchBoards = async () => {
-    try {
-      const boards = await boardService.getBoards();
-      setBoards(boards.data);
-    } catch (error) {
-      console.error('Ошибка загрузки досок:', error);
-    }
-  };
-
-  const fetchColumns = async () => {
-    if (!id) return;
-    try {
-      const response = await columnService.getColumns(id);
-      const columns = response.data;
-      setColumnsByBoard((prev) => ({
-        ...prev,
-        [id]: columns || [],
-      }));
-    } catch (error) {
-      console.error('Ошибка загрузки колонок:', error);
-    }
-  };
 
   const fetchTasks = async () => {
     if (!id || !columnsByBoard[id]) return;
@@ -80,23 +70,10 @@ const BoardPage = () => {
     }
   };
 
-  const onCreateBoard = async (title) => {
-    try {
-      const response = await boardService.createBoard(title);
-      const newBoard = response.data;
-      setBoards([...boards, newBoard]);
-    } catch (error) {
-      console.error('Error creating board:', error);
-    }
-  };
-
-  const onDeleteBoard = async (id) => {
-    try {
-      await boardService.deleteBoard(id);
-      setBoards(boards.filter((board) => board.id !== id));
-    } catch (error) {
-      console.error('Ошибка при удалении доски:', error);
-    }
+  const handleAddColumn = async () => {
+    if (!newColumnTitle.trim()) return;
+    await onCreateColumn(id, newColumnTitle);
+    setNewColumnTitle('');
   };
 
   const handleAddTask = async (columnId, title) => {
@@ -157,70 +134,17 @@ const BoardPage = () => {
     }
   };
 
-  const handleAddColumn = async () => {
-    if (!newColumnTitle.trim()) return;
-    try {
-      const response = await columnService.createColumn(id, newColumnTitle);
-      const newColumn = response.data;
-      setColumnsByBoard((prev) => ({
-        ...prev,
-        [id]: [...(prev[id] || []), newColumn],
-      }));
-      setNewColumnTitle('');
-    } catch (error) {
-      console.error('Ошибка при создании колонки:', error);
-    }
-  };
-
-  const handleEditColumn = async (columnId, newTitle) => {
-    try {
-      const updatedColumn = await columnService.updateColumn(
-        columnId,
-        newTitle
-      );
-
-      setColumnsByBoard((prev) => ({
-        ...prev,
-        [id]: (prev[id] || []).map((col) =>
-          col.id === columnId
-            ? { ...col, title: updatedColumn.data.title }
-            : col
-        ),
-      }));
-    } catch (error) {
-      console.error('Ошибка при обновлении колонки:', error);
-    }
-  };
-
-  const handleDeleteColumn = async (columnId) => {
-    try {
-      await columnService.deleteColumn(columnId);
-
-      setColumnsByBoard((prev) => ({
-        ...prev,
-        [id]: (prev[id] || []).filter((col) => col.id !== columnId),
-      }));
-
-      setTasksByBoard((prev) => {
-        const updatedTasks = { ...prev };
-        delete updatedTasks[columnId];
-        return updatedTasks;
-      });
-    } catch (error) {
-      console.error('Ошибка при удалении колонки:', error);
-    }
-  };
-
   return (
     <>
       <Header />
       <div className={styles.container}>
         <Sidebar
           boards={boards}
-          setBoards={setBoards}
+          setBoards={() => {}}
           onCreateBoard={onCreateBoard}
           onDeleteBoard={onDeleteBoard}
         />
+
         <div className={styles.content}>
           <div className={styles.newColumnForm}>
             <input
@@ -231,6 +155,7 @@ const BoardPage = () => {
             />
             <button onClick={handleAddColumn}>+</button>
           </div>
+
           <div className={styles.columns}>
             {columnsByBoard[id]?.map((column) => (
               <Column
@@ -240,8 +165,8 @@ const BoardPage = () => {
                 onAddTask={handleAddTask}
                 onEditTask={handleEditTask}
                 onDeleteTask={handleDeleteTask}
-                onEditColumn={handleEditColumn}
-                onDeleteColumn={handleDeleteColumn}
+                onEditColumn={onEditColumn}
+                onDeleteColumn={(colId) => onDeleteColumn(id, colId)}
               />
             ))}
           </div>

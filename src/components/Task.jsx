@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import styles from './Task.module.css';
 
 const Task = ({ task, columnId, onEditTask, onDeleteTask }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState(task.title);
 
-  const handleSave = () => {
-    onEditTask(task.id, text); // Теперь всё правильно
+  const handleSave = useCallback(() => {
+    onEditTask(task.id, text);
     setIsEditing(false);
-  };
+  }, [onEditTask, task.id, text]);
+
+  const handleDelete = useCallback(() => {
+    onDeleteTask(task.id, columnId);
+  }, [onDeleteTask, task.id, columnId]);
 
   return (
     <div className={styles.task}>
@@ -26,7 +30,7 @@ const Task = ({ task, columnId, onEditTask, onDeleteTask }) => {
           <span>{task.title}</span>
           <div className={styles.actions}>
             <button onClick={() => setIsEditing(true)}>✏</button>
-            <button onClick={() => onDeleteTask(task.id, columnId)}>✖</button>
+            <button onClick={handleDelete}>✖</button>
           </div>
         </div>
       )}
@@ -34,4 +38,4 @@ const Task = ({ task, columnId, onEditTask, onDeleteTask }) => {
   );
 };
 
-export default Task;
+export default React.memo(Task);
