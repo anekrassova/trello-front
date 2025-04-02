@@ -165,7 +165,7 @@ const BoardPage = () => {
                 onAddTask={handleAddTask}
                 onEditTask={handleEditTask}
                 onDeleteTask={handleDeleteTask}
-                onEditColumn={onEditColumn}
+                onEditColumn={(columnId, newTitle) => onEditColumn(columnId, newTitle, id)}
                 onDeleteColumn={(colId) => onDeleteColumn(id, colId)}
               />
             ))}
