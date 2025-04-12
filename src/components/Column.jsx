@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import Task from './Task';
-import styles from './Column.module.css';
+import styles from '../style/Column.module.css';
 
 const Column = ({
                   column,

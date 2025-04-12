@@ -4,7 +4,7 @@ import authService from '../services/authService';
 import * as boardService from '../services/boardService';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import styles from './Home.module.css';
+import styles from '../style/Home.module.css';
 
 const Home = () => {
   const [boards, setBoards] = useState([]);

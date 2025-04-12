@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import styles from './Task.module.css';
+import styles from '../style/Task.module.css';
 
 const Task = ({ task, columnId, onEditTask, onDeleteTask }) => {
   const [isEditing, setIsEditing] = useState(false);

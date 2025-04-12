@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Board from './Board';
-import styles from './Sidebar.module.css';
+import styles from '../style/Sidebar.module.css';
 
 const Sidebar = ({ boards, setBoards, onCreateBoard, onDeleteBoard }) => {
   const [newBoardTitle, setNewBoardTitle] = useState('');

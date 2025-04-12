@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import styles from './BoardPage.module.css';
+import styles from '../style/BoardPage.module.css';
 
 import { useBoard } from '../context/BoardContext.jsx';
 import authService from '../services/authService';

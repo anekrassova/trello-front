@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
-import styles from './Header.module.css';
+import styles from '../style/Header.module.css';
 import { useTheme } from '../ThemeContext';
 
 const Header = () => {

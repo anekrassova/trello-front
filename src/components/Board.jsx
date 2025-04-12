@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import styles from './Board.module.css';
+import styles from '../style/Board.module.css';
 import * as boardService from '../services/boardService';
 
 const Board = ({ board, onDelete, onUpdate }) => {
