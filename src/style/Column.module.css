@@ -11,7 +11,8 @@
 
 h4 {
     appearance: none;
-    padding: 0 5px;
+    padding: 0 20px;
+    color: var(--text-color);
 }
 
 .taskList {

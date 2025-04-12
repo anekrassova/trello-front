@@ -1,38 +1,59 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Task from './Task';
 import styles from '../style/Column.module.css';
+import * as columnService from '../services/columnService';
+import * as cardService from '../services/cardService';
+import {
+  editColumn,
+  deleteColumn,
+} from '../actions/columnAction';
+import {
+  createTask,
+} from '../actions/cardAction';
 
-const Column = ({
-                  column,
-                  tasks,
-                  onAddTask,
-                  onEditTask,
-                  onDeleteTask,
-                  onEditColumn,
-                  onDeleteColumn,
-                }) => {
+const Column = ({ column, tasks, onDeleteColumn }) => {
+  const dispatch = useDispatch();
   const [newTaskText, setNewTaskText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(column.title);
 
-  const handleAddTask = useCallback(() => {
+  const boardId = useSelector((state) =>
+    Object.keys(state.columnsByBoard).find((boardId) =>
+      state.columnsByBoard[boardId].some((col) => col.id === column.id)
+    )
+  );
+
+  const handleAddTask = async () => {
     if (!newTaskText.trim()) return;
-    onAddTask(column.id, newTaskText);
-    setNewTaskText('');
-  }, [onAddTask, column.id, newTaskText]);
+    try {
+      dispatch(createTask(boardId, column.id, { title: newTaskText }));
+      setNewTaskText('');
+    } catch (error) {
+      console.error('Ошибка при добавлении задачи:', error);
+    }
+  };
 
   const handleEdit = () => setIsEditing(true);
-
   const handleChange = (e) => setNewTitle(e.target.value);
 
-  const handleSave = useCallback(() => {
-    onEditColumn(column.id, newTitle);
-    setIsEditing(false);
-  }, [onEditColumn, column.id, newTitle]);
+  const handleSave = async () => {
+    try {
+      await columnService.updateColumn(column.id, newTitle);
+      dispatch(editColumn(boardId, column.id, newTitle));
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Ошибка при обновлении колонки:', error);
+    }
+  };
 
-  const handleDelete = useCallback(() => {
-    onDeleteColumn(column.id);
-  }, [onDeleteColumn, column.id]);
+  const handleDelete = async () => {
+    try {
+      onDeleteColumn(column.id);
+    } catch (error) {
+      console.error('Ошибка при удалении колонки:', error);
+    }
+  };
 
   return (
     <div className={styles.column}>
@@ -44,27 +65,27 @@ const Column = ({
             onChange={handleChange}
             className={styles.columnInput}
           />
-          <button onClick={handleSave} className={styles.saveButton}>✔</button>
+          <button onClick={handleSave} className={styles.saveButton}>
+            ✔
+          </button>
         </div>
       ) : (
         <div className={styles.columnHeader}>
           <h4>{column.title}</h4>
           <div className={styles.columnActions}>
-            <button onClick={handleEdit} className={styles.columnButton}>✏</button>
-            <button onClick={handleDelete} className={styles.columnButton}>✖</button>
+            <button onClick={handleEdit} className={styles.columnButton}>
+              ✏
+            </button>
+            <button onClick={handleDelete} className={styles.columnButton}>
+              ✖
+            </button>
           </div>
         </div>
       )}
 
       <div className={styles.taskList}>
         {tasks.map((task) => (
-          <Task
-            key={task.id}
-            task={task}
-            columnId={column.id}
-            onEditTask={onEditTask}
-            onDeleteTask={onDeleteTask}
-          />
+          <Task key={task.id} task={task} columnId={column.id} />
         ))}
       </div>
 
@@ -81,4 +102,4 @@ const Column = ({
   );
 };
 
-export default React.memo(Column);
+export default Column;

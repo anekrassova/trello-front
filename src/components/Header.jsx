@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 import styles from '../style/Header.module.css';
-import { useTheme } from '../ThemeContext';
+import { useTheme } from '../context/ThemeContext.jsx';
 
 const Header = () => {
   const user = authService.getCurrentUser();

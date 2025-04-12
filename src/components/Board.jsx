@@ -1,27 +1,33 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from '../style/Board.module.css';
 import * as boardService from '../services/boardService';
+import { removeBoard } from '../actions/boardAction.js';
+import { updateBoard } from '../actions/boardAction.js';
 
-const Board = ({ board, onDelete, onUpdate }) => {
+const Board = ({ board, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(board.title);
+  const dispatch = useDispatch();
 
   const handleEdit = () => setIsEditing(true);
+
   const handleChange = (e) => setNewTitle(e.target.value);
 
   const handleSave = async () => {
     const response = await boardService.updateBoard(board.id, newTitle);
     const updatedBoard = response.data;
     if (updatedBoard) {
-      onUpdate(updatedBoard);
+      dispatch(updateBoard(updatedBoard.id, updatedBoard.title));
       setIsEditing(false);
     }
   };
 
-  const handleDelete = (e) => {
+  const handleDelete = async (e) => {
     e.preventDefault();
-    onDelete(board.id);
+    await boardService.deleteBoard(board.id);
+    dispatch(removeBoard(board.id));
   };
 
   return (
@@ -34,9 +40,7 @@ const Board = ({ board, onDelete, onUpdate }) => {
             onChange={handleChange}
             className={styles.boardInput}
           />
-          <button onClick={handleSave} className={styles.saveButton}>
-            ✔
-          </button>
+          <button onClick={handleSave} className={styles.saveButton}>✔</button>
         </div>
       ) : (
         <>
@@ -53,4 +57,4 @@ const Board = ({ board, onDelete, onUpdate }) => {
   );
 };
 
-export default React.memo(Board);
+export default Board;

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Board from './Board';
 import styles from '../style/Sidebar.module.css';
@@ -7,22 +7,23 @@ const Sidebar = ({ boards, setBoards, onCreateBoard, onDeleteBoard }) => {
   const [newBoardTitle, setNewBoardTitle] = useState('');
   const navigate = useNavigate();
 
-  const handleCreateBoard = useCallback(async () => {
+  const handleCreateBoard = async () => {
     if (!newBoardTitle.trim()) return;
+
     const newBoard = await onCreateBoard(newBoardTitle);
     if (newBoard) {
       setBoards((prev) => [...prev, newBoard]);
     }
     setNewBoardTitle('');
-  }, [newBoardTitle, onCreateBoard, setBoards]);
+  };
 
-  const handleUpdateBoard = useCallback((updatedBoard) => {
+  const handleUpdateBoard = (updatedBoard) => {
     setBoards((prevBoards) =>
       prevBoards.map((board) =>
         board.id === updatedBoard.id ? updatedBoard : board
       )
     );
-  }, [setBoards]);
+  };
 
   return (
     <div className={styles.sidebar}>
@@ -41,12 +42,10 @@ const Sidebar = ({ boards, setBoards, onCreateBoard, onDeleteBoard }) => {
           <div
             key={board.id}
             className={styles.boardLink}
-            onClick={() => navigate(`/board/${board.id}`)}
           >
             <Board
               board={board}
               onDelete={onDeleteBoard}
-              onUpdate={handleUpdateBoard}
             />
           </div>
         ))}
@@ -55,4 +54,4 @@ const Sidebar = ({ boards, setBoards, onCreateBoard, onDeleteBoard }) => {
   );
 };
 
-export default React.memo(Sidebar);
+export default Sidebar;

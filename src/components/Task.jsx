@@ -1,18 +1,36 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from '../style/Task.module.css';
+import * as cardService from '../services/cardService';
+import { editTask, deleteTask } from '../actions/cardAction';
 
-const Task = ({ task, columnId, onEditTask, onDeleteTask }) => {
+const Task = ({ task, columnId }) => {
+  const dispatch = useDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState(task.title);
 
-  const handleSave = useCallback(() => {
-    onEditTask(task.id, text);
-    setIsEditing(false);
-  }, [onEditTask, task.id, text]);
+  const boardId = useSelector((state) =>
+    Object.keys(state.tasksByBoard).find((boardId) =>
+      state.tasksByBoard[boardId]?.[columnId]?.some((t) => t.id === task.id)
+    )
+  );
 
-  const handleDelete = useCallback(() => {
-    onDeleteTask(task.id, columnId);
-  }, [onDeleteTask, task.id, columnId]);
+  const handleSave = async () => {
+    try {
+      dispatch(editTask(boardId, columnId, task.id, { title: text }));
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Ошибка при обновлении задачи:', error);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      dispatch(deleteTask(boardId, columnId, task.id));
+    } catch (error) {
+      console.error('Ошибка при удалении задачи:', error);
+    }
+  };
 
   return (
     <div className={styles.task}>
@@ -38,4 +56,4 @@ const Task = ({ task, columnId, onEditTask, onDeleteTask }) => {
   );
 };
 
-export default React.memo(Task);
+export default Task;

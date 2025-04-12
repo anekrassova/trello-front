@@ -1,34 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import authService from '../services/authService';
-import * as boardService from '../services/boardService';
-import Sidebar from './Sidebar';
 import Header from './Header';
+import Sidebar from './Sidebar';
 import styles from '../style/Home.module.css';
+import { setBoards, removeBoard, updateBoardInState,fetchBoards, createBoard, deleteBoard, updateBoard } from '../actions/boardAction';
+import * as boardService from '../services/boardService.js';
 
 const Home = () => {
-  const [boards, setBoards] = useState([]);
-  const user = authService.getCurrentUser();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const user = authService.getCurrentUser();
 
-  const fetchBoards = async () => {
-    const boards = await boardService.getBoards();
-    const formattedBoards = boards.data.map((board) => ({
-      ...board,
-      id: board.id,
-    }));
-    setBoards(formattedBoards);
-  };
+  const boards = useSelector((state) => state.boards);
 
   useEffect(() => {
-    fetchBoards();
-  }, []);
+    dispatch(fetchBoards());
+  }, [dispatch]);
 
-  useEffect(() => {
-    if (user && boards.length > 0) {
-      navigate(`/board/${boards[0].id}`);
-    }
-  }, [boards, user, navigate]);
+  // useEffect(() => {
+  //   if (user && boards.length > 0) {
+  //     navigate(`/board/${boards[0].id}`);
+  //   }
+  // }, [boards, user, navigate]);
 
   if (!user) {
     navigate('/login');
@@ -36,21 +31,11 @@ const Home = () => {
   }
 
   const onCreateBoard = async (title) => {
-    try {
-      const newBoard = await boardService.createBoard(title);
-      setBoards([...boards, newBoard]);
-    } catch (error) {
-      console.error('Error creating board:', error);
-    }
+    dispatch(createBoard(title));
   };
 
   const onDeleteBoard = async (id) => {
-    try {
-      await boardService.deleteBoard(id);
-      setBoards(boards.filter((board) => board.id !== id));
-    } catch (error) {
-      console.error('Ошибка при удалении доски:', error);
-    }
+    dispatch(removeBoard(id));
   };
 
   return (
@@ -64,7 +49,7 @@ const Home = () => {
           onDeleteBoard={onDeleteBoard}
         />
         <div className={styles.content}>
-          <h3>Loading board...</h3>
+          <h3>Choose board to see its content.</h3>
         </div>
       </div>
     </>

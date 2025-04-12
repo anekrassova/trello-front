@@ -1,138 +1,105 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+
 import styles from '../style/BoardPage.module.css';
-
-import { useBoard } from '../context/BoardContext.jsx';
-import authService from '../services/authService';
-import cardService from '../services/cardService';
-
 import Header from './Header';
 import Sidebar from './Sidebar';
 import Column from './Column';
 
+import authService from '../services/authService';
+
+import {
+  setBoards,
+  removeBoard,
+  fetchBoards,
+  createBoard
+} from '../actions/boardAction';
+
+import {
+  fetchColumns,
+  createColumn,
+  deleteColumn,
+  editColumn
+} from '../actions/columnAction';
+
+import {
+  fetchTasks,
+  createTask,
+  deleteTask,
+  editTask
+} from '../actions/cardAction';
+
 const BoardPage = () => {
   const { id } = useParams();
+  //console.log('id board:', typeof id)
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const user = authService.getCurrentUser();
+  const boards = useSelector((state) => state.boards);
+  const columnsByBoard = useSelector((state) => state.columnsByBoard);
+  const tasksByBoard = useSelector((state) => state.tasksByBoard);
 
-  const {
-    boards,
-    columnsByBoard,
-    fetchBoards,
-    fetchColumns,
-    onCreateBoard,
-    onDeleteBoard,
-    onCreateColumn,
-    onDeleteColumn,
-    onEditColumn,
-  } = useBoard();
-
-  const [tasksByBoard, setTasksByBoard] = useState({});
   const [newColumnTitle, setNewColumnTitle] = useState('');
 
   useEffect(() => {
-    if (!user) navigate('/login');
+    if (!user) {
+      navigate('/login');
+    }
   }, [user, navigate]);
 
   useEffect(() => {
-    fetchBoards();
-  }, []);
+    if (id) {
+      dispatch(fetchBoards());
+      dispatch(fetchColumns(id));
+    }
+  }, [dispatch, id]);
 
   useEffect(() => {
-    if (id) fetchColumns(id);
-  }, [id]);
-
-  useEffect(() => {
-    if (columnsByBoard[id]?.length > 0) {
-      fetchTasks();
+    if (columnsByBoard[id]) {
+      console.log('board id')
+      dispatch(fetchTasks(id, columnsByBoard[id]));
     }
-  }, [columnsByBoard[id]]);
+  }, [dispatch, id, columnsByBoard]);
 
-  const fetchTasks = async () => {
-    if (!id || !columnsByBoard[id]) return;
-
-    try {
-      const tasksArray = await Promise.all(
-        columnsByBoard[id].map(async (column) => {
-          const response = await cardService.getCards(column.id);
-          return { [column.id]: response.data || [] };
-        })
-      );
-
-      const tasks = Object.assign({}, ...tasksArray);
-
-      setTasksByBoard((prev) => ({
-        ...prev,
-        [id]: tasks,
-      }));
-    } catch (error) {
-      console.error('Ошибка загрузки задач:', error);
-    }
+  const onCreateBoard = async (title) => {
+    dispatch(createBoard(title));
   };
 
-  const handleAddColumn = async () => {
+  const onDeleteBoard = async (id) => {
+    dispatch(removeBoard(id));
+  };
+
+  const handleAddColumn = () => {
     if (!newColumnTitle.trim()) return;
-    await onCreateColumn(id, newColumnTitle);
+    dispatch(createColumn(id, newColumnTitle));
     setNewColumnTitle('');
   };
 
-  const handleAddTask = async (columnId, title) => {
-    try {
-      const response = await cardService.createCard(title, columnId);
-      const newTask = response.data;
-      setTasksByBoard((prev) => ({
-        ...prev,
-        [id]: {
-          ...(prev[id] || {}),
-          [columnId]: [...(prev[id]?.[columnId] || []), newTask],
-        },
-      }));
-    } catch (error) {
-      console.error('Ошибка при добавлении задачи:', error);
-    }
+  const handleAddTask = (columnId, title) => {
+    dispatch(createTask(id, columnId, { title }));
   };
 
-  const handleEditTask = async (taskId, newText) => {
-    try {
-      const updatedTask = await cardService.updateCard(taskId, {
-        title: newText,
-      });
-
-      setTasksByBoard((prev) => ({
-        ...prev,
-        [id]: Object.fromEntries(
-          Object.entries(prev[id] || {}).map(([colId, tasks]) => [
-            colId,
-            tasks.map((task) =>
-              task.id === taskId
-                ? { ...task, title: updatedTask.data.title }
-                : task
-            ),
-          ])
-        ),
-      }));
-    } catch (error) {
-      console.error('Ошибка при обновлении задачи:', error);
-    }
+  const handleDeleteTask = (columnId, taskId) => {
+    dispatch(deleteTask(id, columnId, taskId));
   };
 
-  const handleDeleteTask = async (taskId) => {
-    try {
-      await cardService.deleteCard(taskId);
-
-      setTasksByBoard((prev) => ({
-        ...prev,
-        [id]: Object.fromEntries(
-          Object.entries(prev[id] || {}).map(([colId, tasks]) => [
-            colId,
-            tasks.filter((task) => task.id !== taskId),
-          ])
-        ),
-      }));
-    } catch (error) {
-      console.error('Ошибка при удалении задачи:', error);
-    }
+  const handleEditTask = (columnId, taskId, updates) => {
+    dispatch(editTask(id, columnId, taskId, { updates }));
   };
+
+  const handleDeleteColumn = (columnId) => {
+    dispatch(deleteColumn(id, columnId));
+  };
+
+  const handleEditColumn = (columnId, newTitle) => {
+    dispatch(editColumn(id, columnId, newTitle));
+  };
+
+  if (!columnsByBoard[id]) {
+    return <div>Loading board...</div>;
+  }
 
   return (
     <>
@@ -140,11 +107,10 @@ const BoardPage = () => {
       <div className={styles.container}>
         <Sidebar
           boards={boards}
-          setBoards={() => {}}
+          setBoards={setBoards}
           onCreateBoard={onCreateBoard}
           onDeleteBoard={onDeleteBoard}
         />
-
         <div className={styles.content}>
           <div className={styles.newColumnForm}>
             <input
@@ -155,18 +121,17 @@ const BoardPage = () => {
             />
             <button onClick={handleAddColumn}>+</button>
           </div>
-
           <div className={styles.columns}>
             {columnsByBoard[id]?.map((column) => (
               <Column
                 key={column.id}
                 column={column}
                 tasks={tasksByBoard[id]?.[column.id] || []}
-                onAddTask={handleAddTask}
-                onEditTask={handleEditTask}
-                onDeleteTask={handleDeleteTask}
-                onEditColumn={(columnId, newTitle) => onEditColumn(columnId, newTitle, id)}
-                onDeleteColumn={(colId) => onDeleteColumn(id, colId)}
+                onAddTask={(title) => handleAddTask(column.id, title)}
+                onEditTask={(taskId, updates) => handleEditTask(column.id, taskId, updates)}
+                onDeleteTask={(taskId) => handleDeleteTask(column.id, taskId)}
+                onEditColumn={(newTitle) => handleEditColumn(column.id, newTitle)}
+                onDeleteColumn={() => handleDeleteColumn(column.id)}
               />
             ))}
           </div>

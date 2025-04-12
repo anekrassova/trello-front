@@ -10,7 +10,7 @@
 }
 
 .boardItem:hover {
-    background-color: var(--bg-color-hover);
+    background-color: var(--button-color-hover);
 }
 
 .boardTitle {
