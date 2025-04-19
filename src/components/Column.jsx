@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import Task from './Task';
 import styles from '../style/Column.module.css';
 import * as columnService from '../services/columnService';
-import * as cardService from '../services/cardService';
 import {
   editColumn,
   deleteColumn,
@@ -11,48 +10,32 @@ import {
 import {
   createTask,
 } from '../actions/cardAction';
+import { Droppable, Draggable } from 'react-beautiful-dnd';
 
-const Column = ({ column, tasks, onDeleteColumn }) => {
+const Column = ({ column, tasks, boardId }) => {
   const dispatch = useDispatch();
   const [newTaskText, setNewTaskText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(column.title);
 
-  const boardId = useSelector((state) =>
-    Object.keys(state.columnsByBoard).find((boardId) =>
-      state.columnsByBoard[boardId].some((col) => col.id === column.id)
-    )
-  );
+  const droppableId = `column-${column.id}`;
 
-  const handleAddTask = async () => {
+  console.log('Rendering Column with droppableId:', droppableId);
+
+  const handleAddTask = () => {
     if (!newTaskText.trim()) return;
-    try {
-      dispatch(createTask(boardId, column.id, { title: newTaskText }));
-      setNewTaskText('');
-    } catch (error) {
-      console.error('Ошибка при добавлении задачи:', error);
-    }
+    dispatch(createTask(boardId, column.id, { title: newTaskText }));
+    setNewTaskText('');
   };
-
-  const handleEdit = () => setIsEditing(true);
-  const handleChange = (e) => setNewTitle(e.target.value);
 
   const handleSave = async () => {
-    try {
-      await columnService.updateColumn(column.id, newTitle);
-      dispatch(editColumn(boardId, column.id, newTitle));
-      setIsEditing(false);
-    } catch (error) {
-      console.error('Ошибка при обновлении колонки:', error);
-    }
+    await columnService.updateColumn(column.id, newTitle);
+    dispatch(editColumn(boardId, column.id, newTitle));
+    setIsEditing(false);
   };
 
-  const handleDelete = async () => {
-    try {
-      onDeleteColumn(column.id);
-    } catch (error) {
-      console.error('Ошибка при удалении колонки:', error);
-    }
+  const handleDelete = () => {
+    dispatch(deleteColumn(boardId, column.id));
   };
 
   return (
@@ -62,7 +45,7 @@ const Column = ({ column, tasks, onDeleteColumn }) => {
           <input
             type="text"
             value={newTitle}
-            onChange={handleChange}
+            onChange={(e) => setNewTitle(e.target.value)}
             className={styles.columnInput}
           />
           <button onClick={handleSave} className={styles.saveButton}>
@@ -73,7 +56,7 @@ const Column = ({ column, tasks, onDeleteColumn }) => {
         <div className={styles.columnHeader}>
           <h4>{column.title}</h4>
           <div className={styles.columnActions}>
-            <button onClick={handleEdit} className={styles.columnButton}>
+            <button onClick={() => setIsEditing(true)} className={styles.columnButton}>
               ✏
             </button>
             <button onClick={handleDelete} className={styles.columnButton}>
@@ -83,11 +66,30 @@ const Column = ({ column, tasks, onDeleteColumn }) => {
         </div>
       )}
 
-      <div className={styles.taskList}>
-        {tasks.map((task) => (
-          <Task key={task.id} task={task} columnId={column.id} />
-        ))}
-      </div>
+      <Droppable droppableId={droppableId} type="TASK">
+        {(provided) => (
+          <div
+            className={styles.taskList}
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+          >
+            {tasks.map((task, index) => (
+              <Draggable key={task.id} draggableId={`task-${task.id}`} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                  >
+                    <Task task={task} columnId={column.id} />
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
 
       <div className={styles.addTaskForm}>
         <input

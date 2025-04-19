@@ -5,6 +5,7 @@ const columnReducer = (state = {}, action) => {
         ...state,
         [action.payload.boardId]: action.payload.columns,
       };
+
     case 'ADD_COLUMN':
       return {
         ...state,
@@ -13,6 +14,7 @@ const columnReducer = (state = {}, action) => {
           action.payload.column,
         ],
       };
+
     case 'REMOVE_COLUMN':
       return {
         ...state,
@@ -20,6 +22,7 @@ const columnReducer = (state = {}, action) => {
           (column) => column.id !== action.payload.columnId
         ),
       };
+
     case 'UPDATE_COLUMN':
       return {
         ...state,
@@ -29,6 +32,19 @@ const columnReducer = (state = {}, action) => {
             : column
         ),
       };
+
+    case 'MOVE_COLUMN': {
+      const { boardId, sourceIndex, destIndex } = action.payload;
+      const updatedColumns = [...state[boardId]];
+      const [movedColumn] = updatedColumns.splice(sourceIndex, 1);
+      updatedColumns.splice(destIndex, 0, movedColumn);
+
+      return {
+        ...state,
+        [boardId]: updatedColumns,
+      };
+    }
+
     default:
       return state;
   }

@@ -1,28 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-
 import styles from '../style/BoardPage.module.css';
+
 import Header from './Header';
 import Sidebar from './Sidebar';
 import Column from './Column';
 
 import authService from '../services/authService';
-
 import {
   setBoards,
   removeBoard,
   fetchBoards,
   createBoard
 } from '../actions/boardAction';
-
 import {
   fetchColumns,
   createColumn,
   deleteColumn,
   editColumn
 } from '../actions/columnAction';
-
 import {
   fetchTasks,
   createTask,
@@ -30,9 +27,10 @@ import {
   editTask
 } from '../actions/cardAction';
 
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
 const BoardPage = () => {
   const { id } = useParams();
-  //console.log('id board:', typeof id)
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -44,9 +42,7 @@ const BoardPage = () => {
   const [newColumnTitle, setNewColumnTitle] = useState('');
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-    }
+    if (!user) navigate('/login');
   }, [user, navigate]);
 
   useEffect(() => {
@@ -58,18 +54,9 @@ const BoardPage = () => {
 
   useEffect(() => {
     if (columnsByBoard[id]) {
-      console.log('board id')
       dispatch(fetchTasks(id, columnsByBoard[id]));
     }
   }, [dispatch, id, columnsByBoard]);
-
-  const onCreateBoard = async (title) => {
-    dispatch(createBoard(title));
-  };
-
-  const onDeleteBoard = async (id) => {
-    dispatch(removeBoard(id));
-  };
 
   const handleAddColumn = () => {
     if (!newColumnTitle.trim()) return;
@@ -77,29 +64,44 @@ const BoardPage = () => {
     setNewColumnTitle('');
   };
 
-  const handleAddTask = (columnId, title) => {
-    dispatch(createTask(id, columnId, { title }));
+  const handleDragEnd = (result) => {
+    const { source, destination, type, draggableId } = result;
+    if (!destination) return;
+
+    if (type === 'TASK') {
+      const sourceCol = source.droppableId.replace('column-', '');
+      const destCol = destination.droppableId.replace('column-', '');
+
+      if (sourceCol === destCol && source.index === destination.index) return;
+
+      dispatch({
+        type: 'MOVE_TASK',
+        payload: {
+          boardId: id,
+          sourceColumnId: sourceCol,
+          destColumnId: destCol,
+          sourceIndex: source.index,
+          destIndex: destination.index,
+          draggableId,
+        },
+      });
+    }
+
+    if (type === 'COLUMN') {
+      if (source.index === destination.index) return;
+
+      dispatch({
+        type: 'MOVE_COLUMN',
+        payload: {
+          boardId: id,
+          sourceIndex: source.index,
+          destIndex: destination.index,
+        },
+      });
+    }
   };
 
-  const handleDeleteTask = (columnId, taskId) => {
-    dispatch(deleteTask(id, columnId, taskId));
-  };
-
-  const handleEditTask = (columnId, taskId, updates) => {
-    dispatch(editTask(id, columnId, taskId, { updates }));
-  };
-
-  const handleDeleteColumn = (columnId) => {
-    dispatch(deleteColumn(id, columnId));
-  };
-
-  const handleEditColumn = (columnId, newTitle) => {
-    dispatch(editColumn(id, columnId, newTitle));
-  };
-
-  if (!columnsByBoard[id]) {
-    return <div>Loading board...</div>;
-  }
+  const columns = columnsByBoard[id] || [];
 
   return (
     <>
@@ -108,8 +110,8 @@ const BoardPage = () => {
         <Sidebar
           boards={boards}
           setBoards={setBoards}
-          onCreateBoard={onCreateBoard}
-          onDeleteBoard={onDeleteBoard}
+          onCreateBoard={(title) => dispatch(createBoard(title))}
+          onDeleteBoard={(id) => dispatch(removeBoard(id))}
         />
         <div className={styles.content}>
           <div className={styles.newColumnForm}>
@@ -121,20 +123,51 @@ const BoardPage = () => {
             />
             <button onClick={handleAddColumn}>+</button>
           </div>
-          <div className={styles.columns}>
-            {columnsByBoard[id]?.map((column) => (
-              <Column
-                key={column.id}
-                column={column}
-                tasks={tasksByBoard[id]?.[column.id] || []}
-                onAddTask={(title) => handleAddTask(column.id, title)}
-                onEditTask={(taskId, updates) => handleEditTask(column.id, taskId, updates)}
-                onDeleteTask={(taskId) => handleDeleteTask(column.id, taskId)}
-                onEditColumn={(newTitle) => handleEditColumn(column.id, newTitle)}
-                onDeleteColumn={() => handleDeleteColumn(column.id)}
-              />
-            ))}
-          </div>
+
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable
+              droppableId="columns"
+              direction="horizontal"
+              type="COLUMN"
+            >
+              {(provided) => (
+                <div
+                  className={styles.columns}
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                >
+                  {columns.map((column, index) => {
+                    const draggableId = `column-${column.id}`;
+                    console.log('Rendering Draggable:', draggableId);
+
+                    return (
+                      <Draggable
+                        key={column.id}
+                        draggableId={draggableId}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                          >
+                            <div {...provided.dragHandleProps}>
+                              <Column
+                                column={column}
+                                boardId={id} // ⬅ передаём напрямую
+                                tasks={tasksByBoard[id]?.[column.id] || []}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    );
+                  })}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         </div>
       </div>
     </>
