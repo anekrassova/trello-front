@@ -20,6 +20,7 @@ import {
   deleteColumn,
   editColumn,
   setColumns,
+  moveColumn,
 } from '../actions/columnAction';
 import {
   fetchTasks,
@@ -71,10 +72,10 @@ const BoardPage = () => {
     if (!destination) return;
 
     if (type === 'COLUMN') {
-       if (source.index !== destination.index) {
-         reorderLocalColumns(id, source.index, destination.index);
-       }
-     return;
+      if (source.index !== destination.index) {
+        dispatch(moveColumn(id, source.index, destination.index));
+      }
+      return;
     }
 
     if (type === 'TASK') {
@@ -104,7 +105,6 @@ const BoardPage = () => {
     newOrder.splice(destIndex, 0, moved);
     dispatch(setColumns(boardId, newOrder));
   };
-
 
   return (
     <>

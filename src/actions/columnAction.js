@@ -7,14 +7,16 @@ export const setColumns = (boardId, columns) => ({
 });
 
 export const fetchColumns = (boardId) => async (dispatch) => {
-  console.log(`board id для получения колонок: ${boardId}`)
+  console.log(`board id для получения колонок: ${boardId}`);
   const res = await columnService.getColumns(boardId);
-  console.log('полученные колoнки: ', res)
+  console.log('полученные колoнки: ', res);
   dispatch(setColumns(boardId, res.data));
 };
 
 export const createColumn = (boardId, title) => async (dispatch) => {
-  console.log(`запрос на создание колонки. boardId: ${boardId}, title: ${title}`)
+  console.log(
+    `запрос на создание колонки. boardId: ${boardId}, title: ${title}`
+  );
   const res = await columnService.createColumn(boardId, title);
   dispatch({
     type: 'ADD_COLUMN',
@@ -38,7 +40,21 @@ export const editColumn = (boardId, columnId, newTitle) => async (dispatch) => {
   });
 };
 
-export const moveColumn = (boardId, sourceIndex, destIndex) => ({
-  type: 'MOVE_COLUMN',
-  payload: { boardId, sourceIndex, destIndex },
-});
+export const moveColumn =
+  (boardId, sourceIndex, destIndex) => async (dispatch, getState) => {
+    dispatch({
+      type: 'MOVE_COLUMN',
+      payload: { boardId, sourceIndex, destIndex },
+    });
+
+    const state = getState();
+    const updatedColumns = state.columnsByBoard[boardId];
+
+    const orderedColumnIds = updatedColumns.map((col) => col.id);
+
+    try {
+      await columnService.reorderColumns(boardId, orderedColumnIds);
+    } catch (err) {
+      console.error('Ошибка при сохранении порядка колонок:', err);
+    }
+  };
