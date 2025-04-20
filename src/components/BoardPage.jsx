@@ -157,7 +157,7 @@ const BoardPage = () => {
                             <div {...provided.dragHandleProps}>
                               <Column
                                 column={column}
-                                boardId={id} // ⬅ передаём напрямую
+                                boardId={id}
                                 tasks={tasksByBoard[id]?.[column.id] || []}
                               />
                             </div>

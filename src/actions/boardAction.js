@@ -29,9 +29,10 @@ export const createBoard = (title) => async (dispatch) => {
   try {
     //console.log('клиент отправляет при создании доски: ', title)
     const newBoard = await boardService.createBoard(title);
+    console.log('доска создана: ', newBoard);
     dispatch({
       type: 'ADD_BOARD',
-      payload: newBoard,
+      payload: newBoard.data,
     });
   } catch (error) {
     console.error('Ошибка при добавлении доски:', error);
