@@ -8,17 +8,22 @@ export const setTasks = (boardId, tasks) => ({
 export const fetchTasks = (boardId, columnIds) => async (dispatch) => {
   const tasks = {};
   for (const columnId of columnIds) {
-    console.log('columnId:', columnId);
+    //console.log('columnId:', columnId);
     const res = await cardService.getCards(columnId.id);
-    console.log('fetched cards: ', res)
+    //console.log('fetched cards: ', res);
     tasks[columnId.id] = res.data;
-    console.log(`tasks for column ${columnId.id}: ${tasks[columnId.id]}`)
+    console.log(`tasks for column ${columnId.id}: ${tasks[columnId.id]}`);
   }
   dispatch(setTasks(boardId, tasks));
 };
 
 export const createTask = (boardId, columnId, taskData) => async (dispatch) => {
-  const res = await cardService.createCard(taskData.title, columnId, taskData.description || '', taskData.position || 0);
+  const res = await cardService.createCard(
+    taskData.title,
+    columnId,
+    taskData.description || '',
+    taskData.position || 0
+  );
   dispatch({
     type: 'ADD_TASK',
     payload: { boardId, columnId, task: res.data },
@@ -33,10 +38,46 @@ export const deleteTask = (boardId, columnId, taskId) => async (dispatch) => {
   });
 };
 
-export const editTask = (boardId, columnId, taskId, updates) => async (dispatch) => {
-  await cardService.updateCard(taskId, updates);
-  dispatch({
-    type: 'UPDATE_TASK',
-    payload: { boardId, columnId, taskId, updates },
-  });
-};
+export const editTask =
+  (boardId, columnId, taskId, updates) => async (dispatch) => {
+    await cardService.updateCard(taskId, updates);
+    dispatch({
+      type: 'UPDATE_TASK',
+      payload: { boardId, columnId, taskId, updates },
+    });
+  };
+
+export const moveTask =
+  (
+    boardId,
+    draggableId,
+    sourceColumnId,
+    destColumnId,
+    sourceIndex,
+    destIndex
+  ) =>
+  async (dispatch) => {
+    const taskId = draggableId.replace('task-', '');
+
+    dispatch({
+      type: 'MOVE_TASK',
+      payload: {
+        boardId,
+        sourceColumnId,
+        destColumnId,
+        sourceIndex,
+        destIndex,
+        draggableId,
+      },
+    });
+
+    try {
+      await cardService.moveTask(taskId, {
+        sourceColumnId,
+        destColumnId,
+        destIndex,
+      });
+    } catch (err) {
+      console.error('Ошибка при перемещении задачи на сервере', err);
+    }
+  };

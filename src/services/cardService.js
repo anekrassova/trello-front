@@ -4,9 +4,15 @@ const API_URL = 'http://localhost:3000/api/cards';
 
 export const getCards = async (columnId) => {
   const token = localStorage.getItem('token');
-  return fetchWithErrorHandling(`${API_URL}/${columnId}`, {
+  const response = await fetchWithErrorHandling(`${API_URL}/${columnId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
+  if (response.data) {
+    response.data.sort((a, b) => a.position - b.position);
+  }
+
+  return response;
 };
 
 export const createCard = async (title, column, description, position) => {
@@ -41,4 +47,19 @@ export const deleteCard = async (id) => {
   });
 };
 
-export default { getCards, createCard, updateCard, deleteCard };
+export const moveTask = async (taskId, data) => {
+  const token = localStorage.getItem('token');
+  return fetchWithErrorHandling(
+    `http://localhost:3000/api/cards/${taskId}/move`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }
+  );
+};
+
+export default { getCards, createCard, updateCard, deleteCard, moveTask };

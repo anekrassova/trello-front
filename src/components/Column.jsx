@@ -3,13 +3,8 @@ import { useDispatch } from 'react-redux';
 import Task from './Task';
 import styles from '../style/Column.module.css';
 import * as columnService from '../services/columnService';
-import {
-  editColumn,
-  deleteColumn,
-} from '../actions/columnAction';
-import {
-  createTask,
-} from '../actions/cardAction';
+import { editColumn, deleteColumn } from '../actions/columnAction';
+import { createTask } from '../actions/cardAction';
 import { Droppable, Draggable } from 'react-beautiful-dnd';
 
 const Column = ({ column, tasks, boardId }) => {
@@ -20,7 +15,7 @@ const Column = ({ column, tasks, boardId }) => {
 
   const droppableId = `column-${column.id}`;
 
-  console.log('Rendering Column with droppableId:', droppableId);
+  //console.log('Rendering Column with droppableId:', droppableId);
 
   const handleAddTask = () => {
     if (!newTaskText.trim()) return;
@@ -56,7 +51,10 @@ const Column = ({ column, tasks, boardId }) => {
         <div className={styles.columnHeader}>
           <h4>{column.title}</h4>
           <div className={styles.columnActions}>
-            <button onClick={() => setIsEditing(true)} className={styles.columnButton}>
+            <button
+              onClick={() => setIsEditing(true)}
+              className={styles.columnButton}
+            >
               ✏
             </button>
             <button onClick={handleDelete} className={styles.columnButton}>
@@ -74,7 +72,11 @@ const Column = ({ column, tasks, boardId }) => {
             ref={provided.innerRef}
           >
             {tasks.map((task, index) => (
-              <Draggable key={task.id} draggableId={`task-${task.id}`} index={index}>
+              <Draggable
+                key={task.id}
+                draggableId={`task-${task.id}`}
+                index={index}
+              >
                 {(provided) => (
                   <div
                     ref={provided.innerRef}

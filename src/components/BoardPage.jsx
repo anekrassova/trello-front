@@ -12,19 +12,20 @@ import {
   setBoards,
   removeBoard,
   fetchBoards,
-  createBoard
+  createBoard,
 } from '../actions/boardAction';
 import {
   fetchColumns,
   createColumn,
   deleteColumn,
-  editColumn
+  editColumn,
 } from '../actions/columnAction';
 import {
   fetchTasks,
   createTask,
   deleteTask,
-  editTask
+  editTask,
+  moveTask,
 } from '../actions/cardAction';
 
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -74,30 +75,16 @@ const BoardPage = () => {
 
       if (sourceCol === destCol && source.index === destination.index) return;
 
-      dispatch({
-        type: 'MOVE_TASK',
-        payload: {
-          boardId: id,
-          sourceColumnId: sourceCol,
-          destColumnId: destCol,
-          sourceIndex: source.index,
-          destIndex: destination.index,
+      dispatch(
+        moveTask(
+          id,
           draggableId,
-        },
-      });
-    }
-
-    if (type === 'COLUMN') {
-      if (source.index === destination.index) return;
-
-      dispatch({
-        type: 'MOVE_COLUMN',
-        payload: {
-          boardId: id,
-          sourceIndex: source.index,
-          destIndex: destination.index,
-        },
-      });
+          sourceCol,
+          destCol,
+          source.index,
+          destination.index
+        )
+      );
     }
   };
 
@@ -138,7 +125,7 @@ const BoardPage = () => {
                 >
                   {columns.map((column, index) => {
                     const draggableId = `column-${column.id}`;
-                    console.log('Rendering Draggable:', draggableId);
+                    //console.log('Rendering Draggable:', draggableId);
 
                     return (
                       <Draggable
