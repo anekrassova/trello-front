@@ -37,3 +37,8 @@ export const editColumn = (boardId, columnId, newTitle) => async (dispatch) => {
     payload: { boardId, columnId, newTitle },
   });
 };
+
+export const moveColumn = (boardId, sourceIndex, destIndex) => ({
+  type: 'MOVE_COLUMN',
+  payload: { boardId, sourceIndex, destIndex },
+});

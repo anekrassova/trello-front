@@ -5,7 +5,7 @@ import styles from '../style/Column.module.css';
 import * as columnService from '../services/columnService';
 import { editColumn, deleteColumn } from '../actions/columnAction';
 import { createTask } from '../actions/cardAction';
-import { Droppable, Draggable } from 'react-beautiful-dnd';
+import { Droppable, Draggable } from '@hello-pangea/dnd';
 
 const Column = ({ column, tasks, boardId }) => {
   const dispatch = useDispatch();
