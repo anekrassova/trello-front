@@ -18,7 +18,6 @@ export const updateBoardInState = (board) => ({
 export const fetchBoards = () => async (dispatch) => {
   try {
     const boards = await boardService.getBoards();
-    //console.log("fetched data:", boards)
     dispatch(setBoards(boards.data));
   } catch (error) {
     console.error('Ошибка при загрузке досок:', error);
@@ -27,9 +26,7 @@ export const fetchBoards = () => async (dispatch) => {
 
 export const createBoard = (title) => async (dispatch) => {
   try {
-    //console.log('клиент отправляет при создании доски: ', title)
     const newBoard = await boardService.createBoard(title);
-    console.log('доска создана: ', newBoard);
     dispatch({
       type: 'ADD_BOARD',
       payload: newBoard.data,

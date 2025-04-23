@@ -53,7 +53,6 @@ export const deleteColumn = async (id) => {
 
 export const reorderColumns = async (boardId, orderedColumnIds) => {
   const token = localStorage.getItem('token');
-  //console.log('Sending reorderColumns with:', boardId, orderedColumnIds);
   return fetchWithErrorHandling(`http://localhost:3000/api/columns/reorder`, {
     method: 'PUT',
     headers: {

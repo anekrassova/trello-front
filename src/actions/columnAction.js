@@ -7,16 +7,11 @@ export const setColumns = (boardId, columns) => ({
 });
 
 export const fetchColumns = (boardId) => async (dispatch) => {
-  console.log(`board id для получения колонок: ${boardId}`);
   const res = await columnService.getColumns(boardId);
-  console.log('полученные колoнки: ', res);
   dispatch(setColumns(boardId, res.data));
 };
 
 export const createColumn = (boardId, title) => async (dispatch) => {
-  console.log(
-    `запрос на создание колонки. boardId: ${boardId}, title: ${title}`
-  );
   const res = await columnService.createColumn(boardId, title);
   dispatch({
     type: 'ADD_COLUMN',

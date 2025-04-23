@@ -5,7 +5,15 @@ import authService from '../services/authService';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import styles from '../style/Home.module.css';
-import { setBoards, removeBoard, updateBoardInState,fetchBoards, createBoard, deleteBoard, updateBoard } from '../actions/boardAction';
+import {
+  setBoards,
+  removeBoard,
+  updateBoardInState,
+  fetchBoards,
+  createBoard,
+  deleteBoard,
+  updateBoard,
+} from '../actions/boardAction';
 import * as boardService from '../services/boardService.js';
 
 const Home = () => {
@@ -18,12 +26,6 @@ const Home = () => {
   useEffect(() => {
     dispatch(fetchBoards());
   }, [dispatch]);
-
-  // useEffect(() => {
-  //   if (user && boards.length > 0) {
-  //     navigate(`/board/${boards[0].id}`);
-  //   }
-  // }, [boards, user, navigate]);
 
   if (!user) {
     navigate('/login');

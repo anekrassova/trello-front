@@ -5,7 +5,6 @@ import styles from '../style/Sidebar.module.css';
 
 const Sidebar = ({ boards, setBoards, onCreateBoard, onDeleteBoard }) => {
   const [newBoardTitle, setNewBoardTitle] = useState('');
-  const navigate = useNavigate();
 
   const handleCreateBoard = async () => {
     if (!newBoardTitle.trim()) return;
@@ -15,14 +14,6 @@ const Sidebar = ({ boards, setBoards, onCreateBoard, onDeleteBoard }) => {
       setBoards((prev) => [...prev, newBoard]);
     }
     setNewBoardTitle('');
-  };
-
-  const handleUpdateBoard = (updatedBoard) => {
-    setBoards((prevBoards) =>
-      prevBoards.map((board) =>
-        board.id === updatedBoard.id ? updatedBoard : board
-      )
-    );
   };
 
   return (
@@ -39,14 +30,8 @@ const Sidebar = ({ boards, setBoards, onCreateBoard, onDeleteBoard }) => {
       </div>
       <div className={styles.boardList}>
         {boards.map((board) => (
-          <div
-            key={board.id}
-            className={styles.boardLink}
-          >
-            <Board
-              board={board}
-              onDelete={onDeleteBoard}
-            />
+          <div key={board.id} className={styles.boardLink}>
+            <Board board={board} onDelete={onDeleteBoard} />
           </div>
         ))}
       </div>

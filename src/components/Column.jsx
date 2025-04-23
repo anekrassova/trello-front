@@ -15,8 +15,6 @@ const Column = ({ column, tasks, boardId }) => {
 
   const droppableId = `column-${column.id}`;
 
-  //console.log('Rendering Column with droppableId:', droppableId);
-
   const handleAddTask = () => {
     if (!newTaskText.trim()) return;
     dispatch(createTask(boardId, column.id, { title: newTaskText }));

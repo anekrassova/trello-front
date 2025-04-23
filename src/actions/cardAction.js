@@ -8,11 +8,8 @@ export const setTasks = (boardId, tasks) => ({
 export const fetchTasks = (boardId, columnIds) => async (dispatch) => {
   const tasks = {};
   for (const columnId of columnIds) {
-    //console.log('columnId:', columnId);
     const res = await cardService.getCards(columnId.id);
-    //console.log('fetched cards: ', res);
     tasks[columnId.id] = res.data;
-    console.log(`tasks for column ${columnId.id}: ${tasks[columnId.id]}`);
   }
   dispatch(setTasks(boardId, tasks));
 };

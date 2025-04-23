@@ -17,18 +17,9 @@ import {
 import {
   fetchColumns,
   createColumn,
-  deleteColumn,
-  editColumn,
-  setColumns,
   moveColumn,
 } from '../actions/columnAction';
-import {
-  fetchTasks,
-  createTask,
-  deleteTask,
-  editTask,
-  moveTask,
-} from '../actions/cardAction';
+import { fetchTasks, moveTask } from '../actions/cardAction';
 
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
@@ -99,13 +90,6 @@ const BoardPage = () => {
 
   const columns = columnsByBoard[id] || [];
 
-  const reorderLocalColumns = (boardId, sourceIndex, destIndex) => {
-    const newOrder = Array.from(columns);
-    const [moved] = newOrder.splice(sourceIndex, 1);
-    newOrder.splice(destIndex, 0, moved);
-    dispatch(setColumns(boardId, newOrder));
-  };
-
   return (
     <>
       <Header />
@@ -141,7 +125,6 @@ const BoardPage = () => {
                 >
                   {columns.map((column, index) => {
                     const draggableId = `column-${column.id}`;
-                    //console.log('Rendering Draggable:', draggableId);
 
                     return (
                       <Draggable
